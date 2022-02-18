@@ -62,8 +62,8 @@ def dist(point1, point2):
 
 if __name__ == '__main__':
     # Setup
-    temp = 20
-    cooling_rate = 0.00001
+    temp = 5000
+    cooling_rate = 0.001
     clusters = [(20, 20, 20), (20, 80, 20), (80, 80, 80)]
     current_path = make_point_clusters(clusters, 10, 20, 20, 20)
 
@@ -72,36 +72,39 @@ if __name__ == '__main__':
 
     # Keeps track of changes for file names
     iteration = 0
-    last_temp = 20
+    last_temp = 5000 
     should_save = False
 
-    while temp > 0:
+    cycles = 0
+
+    while temp > 0.05:
         index1 = randrange(len(current_path))
         index2 = randrange(len(current_path))
 
         new_path = swap_elements(current_path, index1, index2)
-        delta_e = score(new_path) - score(current_path)
+        nd = score(new_path)
+        d = score(current_path)
+        delta_e = nd - d
 
         if delta_e < 0:
             current_path = new_path[:]
             iteration += 1
             should_save = True
-        else:
+        elif delta_e > 0:
             probability = math.exp(-1 * delta_e/temp)
-            if randrange(100) < probability*100:
+            rand = randrange(1, 100)
+            if rand < probability*100:
                 current_path = new_path[:]
                 iteration += 1
                 should_save = True
 
-        temp -= cooling_rate
+        cycles += 1
+        temp = 5000/(1+cycles)
 
-        if temp < last_temp - 0.1:
-            print(f"Temperature is {temp}")
+        if temp < last_temp-0.1:
             last_temp = temp
 
-
-
-           # Plot the final path
+   # Plot the final path
     x = [a for (a, b, c) in current_path]
     y = [b for (a, b, c) in current_path]
     z = [c for (a, b, c) in current_path]
@@ -111,21 +114,18 @@ if __name__ == '__main__':
     ax.scatter3D(x, y, z)
     ax.plot3D(x, y, z)
     plt.show()
-   
-    if False:
-         if should_save:
-            x = [a for (a, b, c) in current_path]
-            y = [b for (a, b, c) in current_path]
-            z = [c for (a, b, c) in current_path]
 
+if False:
+    if should_save:
+        x = [a for (a, b, c) in current_path]
+        y = [b for (a, b, c) in current_path]
+        z = [c for (a, b, c) in current_path]
 
-            fig = plt.figure()
-            ax = plt.axes(projection='3d')
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
 
-            ax.scatter3D(x, y, z)
-            ax.plot3D(x, y, z)
-            plt.savefig(f"plots/path_{iteration}.png")
-            plt.close()
-
-
+        ax.scatter3D(x, y, z)
+        ax.plot3D(x, y, z)
+        plt.savefig(f"plots/path_{iteration}.png")
+        plt.close()
 
